@@ -1,6 +1,7 @@
 package chocopy.common.astnodes;
 
 import chocopy.common.analysis.NodeAnalyzer;
+import chocopy.common.analysis.types.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import chocopy.common.analysis.SymbolTable;
 
 import java.io.IOException;
 
@@ -47,6 +49,7 @@ import java.io.IOException;
     @JsonSubTypes.Type(IndexExpr.class),
     @JsonSubTypes.Type(IntegerLiteral.class),
     @JsonSubTypes.Type(ListExpr.class),
+    @JsonSubTypes.Type(ForListExpr.class),
     @JsonSubTypes.Type(ListType.class),
     @JsonSubTypes.Type(MemberExpr.class),
     @JsonSubTypes.Type(MethodCallExpr.class),
@@ -58,11 +61,25 @@ import java.io.IOException;
     @JsonSubTypes.Type(TypedVar.class),
     @JsonSubTypes.Type(UnaryExpr.class),
     @JsonSubTypes.Type(VarDef.class),
+    @JsonSubTypes.Type(ConstVarDef.class),
     @JsonSubTypes.Type(WhileStmt.class),
 })
 public abstract class Node {
     /** Node-type indicator for JSON form. */
     public final String kind;
+    /** symbolTable entry for this node */
+    @JsonIgnore
+    public SymbolTable<Type> sym;
+
+    @JsonIgnore
+    public SymbolTable<Type> getSymbolTable(){
+        return this.sym;
+    }
+
+    @JsonIgnore
+    public final void setSymbolTable(SymbolTable<Type> sym){
+        this.sym = sym;
+    }
 
     /**
      * Source position information: 0: line number of start, 1: column number of start, 2: line
@@ -76,7 +93,6 @@ public abstract class Node {
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String errorMsg;
-
     /** A Node corresponding to source text between LEFT and RIGHT. */
     public Node(Location left, Location right) {
         if (left != null) {
@@ -89,6 +105,7 @@ public abstract class Node {
         }
         this.kind = getClass().getSimpleName();
         this.errorMsg = null;
+        this.sym = new SymbolTable<>();
     }
 
     /**
