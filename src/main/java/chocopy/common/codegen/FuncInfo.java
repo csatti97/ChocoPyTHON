@@ -53,8 +53,14 @@ public class FuncInfo extends SymbolInfo {
     /** The label of the generated code for the function's body. */
     protected final Label codeLabel;
 
+    /** The label of the generated code for the state of function statements. */
+    protected final Label codeStartLabel;
+
     /** The descriptor of the enclosing function (this is only non-null for nested functions). */
     protected final FuncInfo parentFuncInfo;
+
+    /** Whether the function is method of some class */
+    public boolean isMethod;
 
     /**
      * A method that is invoked to emit the function's body.
@@ -81,11 +87,13 @@ public class FuncInfo extends SymbolInfo {
             Consumer<FuncInfo> emitter) {
         this.funcName = funcName;
         this.codeLabel = new Label(String.format("$%s", funcName));
+        this.codeStartLabel = new Label(String.format("$%s-start", funcName));
         this.depth = depth;
         this.returnType = returnType;
         this.symbolTable = new SymbolTable<>(parentSymbolTable);
         this.parentFuncInfo = parentFuncInfo;
         this.emitter = emitter;
+        this.isMethod = false; // by default, set it to false
     }
 
     /** Adds parameter with descriptor PARAMINFO to this function. */
@@ -113,16 +121,17 @@ public class FuncInfo extends SymbolInfo {
      * variables contiguously in its activation record, where the N+1st is the frame pointer and the
      * N+2nd is the return address.
      *
+     * <p> Remark: above comment is wrong in our implementation. I would re-write it sonner.
      * <p>Caution: this is an index (starting at 0), and not an offset in number of bytes.
      */
     public int getVarIndex(String name) {
         int idx = params.indexOf(name);
         if (idx >= 0) {
-            return idx;
+            return -idx - 1;
         }
         for (int i = 0; i < locals.size(); i++) {
             if (locals.get(i).getVarName().equals(name)) {
-                return i + params.size() + 2;
+                return i + 2;
             }
         }
         String msg = String.format("%s is not a var defined in function %s", name, funcName);
@@ -132,6 +141,10 @@ public class FuncInfo extends SymbolInfo {
     /** Returns the label corresponding to the function's body in assembly. */
     public Label getCodeLabel() {
         return codeLabel;
+    }
+
+    public Label getCodeStartLabel() {
+        return codeStartLabel;
     }
 
     /**
