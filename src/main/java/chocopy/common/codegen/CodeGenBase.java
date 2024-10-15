@@ -327,6 +327,11 @@ public abstract class CodeGenBase {
         backend.defineSym("error_none", ERROR_NONE);
         backend.defineSym("error_oom", ERROR_OOM);
         backend.defineSym("error_nyi", ERROR_NYI);
+
+        backend.defineSym("bool.True", "const_1");
+        backend.defineSym("bool.False", "const_0");
+
+        backend.defineSym("listHeaderWords", 4);
     }
 
     // =======================================
@@ -429,6 +434,15 @@ public abstract class CodeGenBase {
 
                 this.globalVars.add(globalVar);
                 this.globalSymbols.put(globalVar.getVarName(), globalVar);
+            } else if (decl instanceof ConstVarDef) {
+                ConstVarDef varDef = (ConstVarDef) decl;
+                ValueType varType = ValueType.annotationToValueType(varDef.var.type);
+                GlobalVarInfo globalVar =
+                        makeGlobalVarInfo(varDef.var.identifier.name, varType, varDef.value);
+
+                this.globalVars.add(globalVar);
+                this.globalSymbols.setConst(globalVar.getVarName());
+                this.globalSymbols.put(globalVar.getVarName(), globalVar);
             }
         }
 
@@ -473,6 +487,7 @@ public abstract class CodeGenBase {
             } else if (decl instanceof FuncDef) {
                 FuncDef funcDef = (FuncDef) decl;
                 FuncInfo methodInfo = analyzeFunction(className, funcDef, 0, globalSymbols, null);
+                methodInfo.isMethod = true;
                 this.functions.add(methodInfo);
                 classInfo.addMethod(methodInfo);
             }
@@ -569,17 +584,32 @@ public abstract class CodeGenBase {
         }
 
         @Override
+        public Void analyze(ConstVarDef localVarDef) {
+            ValueType localVarType = ValueType.annotationToValueType(localVarDef.var.type);
+            StackVarInfo localVar =
+                    makeStackVarInfo(
+                            localVarDef.var.identifier.name,
+                            localVarType,
+                            localVarDef.value,
+                            funcInfo);
+            funcInfo.addLocal(localVar);
+            return null;
+        }
+
+        @Override
         public Void analyze(GlobalDecl decl) {
             SymbolInfo symInfo = globalSymbols.get(decl.getIdentifier().name);
             assert symInfo instanceof GlobalVarInfo
                     : "Semantic analysis should ensure that global var exists";
             GlobalVarInfo globalVar = (GlobalVarInfo) symInfo;
             funcInfo.getSymbolTable().put(globalVar.getVarName(), globalVar);
+            funcInfo.getSymbolTable().setGlobal(globalVar.getVarName());
             return null;
         }
 
         @Override
         public Void analyze(NonLocalDecl decl) {
+            funcInfo.getSymbolTable().setNonlocal(decl.variable.name);
             assert funcInfo.getSymbolTable().get(decl.getIdentifier().name) instanceof StackVarInfo
                     : "Semantic analysis should ensure nonlocal var exists";
             return null;
