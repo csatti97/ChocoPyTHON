@@ -62,6 +62,8 @@ public interface NodeAnalyzer<T> {
 
     T analyze(ListExpr node);
 
+    T analyze(ForListExpr node);
+
     T analyze(ListType node);
 
     T analyze(MemberExpr node);
@@ -83,6 +85,8 @@ public interface NodeAnalyzer<T> {
     T analyze(UnaryExpr node);
 
     T analyze(VarDef node);
+
+    T analyze(ConstVarDef node);
 
     T analyze(WhileStmt node);
 
