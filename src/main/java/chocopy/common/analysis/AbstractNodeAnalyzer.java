@@ -100,6 +100,11 @@ public class AbstractNodeAnalyzer<T> implements NodeAnalyzer<T> {
     }
 
     @Override
+    public T analyze(ForListExpr node) {
+        return defaultAction(node);
+    }
+
+    @Override
     public T analyze(ListType node) {
         return defaultAction(node);
     }
@@ -151,6 +156,11 @@ public class AbstractNodeAnalyzer<T> implements NodeAnalyzer<T> {
 
     @Override
     public T analyze(VarDef node) {
+        return defaultAction(node);
+    }
+
+    @Override
+    public T analyze(ConstVarDef node) {
         return defaultAction(node);
     }
 
