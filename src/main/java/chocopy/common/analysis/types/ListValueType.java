@@ -30,8 +30,10 @@ public class ListValueType extends ValueType {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ListValueType listType = (ListValueType) o;
-        return Objects.equals(elementType, listType.elementType);
+
+        ListValueType tlo = (ListValueType) o;
+
+        return Objects.equals(elementType, tlo.elementType);
     }
 
     @Override
