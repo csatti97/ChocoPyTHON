@@ -83,10 +83,17 @@ public class Constants {
      * @param value the string value
      * @return the label for the string value
      */
+    public int maxCharAscii = 0;
     public Label getStrConstant(String value) {
         if (strConstants.containsKey(value)) {
             return strConstants.get(value);
         } else {
+            for (int i = 0; i < value.length(); i++) {
+                // Print current character
+                int nowAscii = (int) value.charAt(i);
+                maxCharAscii = nowAscii > maxCharAscii ? nowAscii : maxCharAscii;
+            }
+
             Label newLabel = generateConstantLabel();
             strConstants.put(value, newLabel);
             return newLabel;
