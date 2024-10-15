@@ -20,7 +20,7 @@ public class StudentAnalysis {
         SymbolTable<Type> globalSym = declarationAnalyzer.getGlobals();
 
         if (!program.hasErrors()) {
-            TypeChecker typeChecker = new TypeChecker(globalSym, program.errors);
+            TypeChecker typeChecker = new TypeChecker(globalSym, declarationAnalyzer.classTable, program.errors);
             program.dispatch(typeChecker);
         }
 
