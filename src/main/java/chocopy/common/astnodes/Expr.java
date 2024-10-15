@@ -3,6 +3,8 @@ package chocopy.common.astnodes;
 import chocopy.common.analysis.types.Type;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 /**
  * Base of all AST nodes representing expressions.
@@ -12,9 +14,14 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * expressions such as binary expressions and literals that subclass this class.
  */
 public abstract class Expr extends Node {
+    @JsonIgnore
+    /** Code generation: this expression does not have a return register **/
+    public boolean noreturn;
+
     /** A ChocoPy expression spanning source locations [LEFT..RIGHT]. */
     public Expr(Location left, Location right) {
         super(left, right);
+        this.noreturn = false;
     }
 
     /**
