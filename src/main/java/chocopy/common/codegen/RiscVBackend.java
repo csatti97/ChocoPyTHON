@@ -51,8 +51,12 @@ public class RiscVBackend {
         /** The name of the register used in assembly. */
         protected final String name;
 
+        /** the value is not assigned at that time **/
+        public boolean isValueTrivial;
+
         /** This register's code representation is NAME. */
         Register(String name) {
+            isValueTrivial = false;
             this.name = name;
         }
 
@@ -61,6 +65,8 @@ public class RiscVBackend {
             return this.name;
         }
     }
+
+    public static Register[] TempRegs = {Register.T0, Register.T1, Register.T2, Register.T3, Register.T4, Register.T5, Register.T6};
 
     @Override
     public String toString() {
@@ -102,6 +108,16 @@ public class RiscVBackend {
     protected void emit(String str) {
         out.println(str);
     }
+
+    /**
+     * Emits instruction or directive INSN along with COMMENT as a one-line comment, if non-null.
+     */
+    public void emitComment(String comment) {
+        if (comment != null) {
+            emit(String.format("# %s", comment));
+        }
+    }
+
 
     /**
      * Emits instruction or directive INSN along with COMMENT as a one-line comment, if non-null.
@@ -195,6 +211,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitLA(Register rd, Label label, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("la %s, %s", rd, label), comment);
     }
 
@@ -203,6 +220,7 @@ public class RiscVBackend {
      * (null if missing).
      */
     public void emitLI(Register rd, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("li %s, %d", rd, imm), comment);
     }
 
@@ -211,6 +229,7 @@ public class RiscVBackend {
      * IMM < 2**20. COMMENT is an optional one-line comment (null if missing).
      */
     public void emitLUI(Register rd, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("lui %s, %d", rd, imm), comment);
     }
 
@@ -219,6 +238,7 @@ public class RiscVBackend {
      * comment (null if missing).
      */
     public void emitMV(Register rd, Register rs, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("mv %s, %s", rd, rs), comment);
     }
 
@@ -259,6 +279,7 @@ public class RiscVBackend {
      * COMMENT is an optional one-line comment (null if missing).
      */
     public void emitADDI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("addi %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -269,6 +290,7 @@ public class RiscVBackend {
      * if missing).
      */
     public void emitADDI(Register rd, Register rs, String imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("addi %s, %s, %s", rd, rs, imm), comment);
     }
 
@@ -277,6 +299,7 @@ public class RiscVBackend {
      * comment (null if missing).
      */
     public void emitADD(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("add %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -285,6 +308,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSUB(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("sub %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -293,6 +317,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitMUL(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("mul %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -302,6 +327,7 @@ public class RiscVBackend {
      * -2**31. COMMENT is an optional one-line comment (null if missing).
      */
     public void emitDIV(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("div %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -311,6 +337,7 @@ public class RiscVBackend {
      * missing).
      */
     public void emitREM(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("rem %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -319,6 +346,7 @@ public class RiscVBackend {
      * missing).
      */
     public void emitXOR(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("xor %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -327,6 +355,7 @@ public class RiscVBackend {
      * optional one-line comment (null if missing).
      */
     public void emitXORI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("xori %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -335,6 +364,7 @@ public class RiscVBackend {
      * (null if missing).
      */
     public void emitAND(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("and %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -343,6 +373,7 @@ public class RiscVBackend {
      * is an optional one-line comment (null if missing).
      */
     public void emitANDI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("andi %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -351,6 +382,7 @@ public class RiscVBackend {
      * if missing).
      */
     public void emitOR(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("or %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -359,6 +391,7 @@ public class RiscVBackend {
      * is an optional one-line comment (null if missing).
      */
     public void emitORI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("ori %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -367,6 +400,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSLL(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("sll %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -375,6 +409,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSLLI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("slli %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -383,6 +418,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSRL(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("srl %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -391,6 +427,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSRLI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("srli %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -399,6 +436,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSRA(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("sra %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -407,6 +445,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSRAI(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("srai %s, %s, %d", rd, rs, imm), comment);
     }
 
@@ -415,6 +454,7 @@ public class RiscVBackend {
      * an optional one-line comment (null if missing).
      */
     public void emitLW(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("lw %s, %d(%s)", rd, imm, rs), comment);
     }
 
@@ -424,7 +464,18 @@ public class RiscVBackend {
      * if missing).
      */
     public void emitLW(Register rd, Register rs, String imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("lw %s, %s(%s)", rd, imm, rs), comment);
+    }
+
+    /**
+     * Emits a load-word instruction: RD = MEMORY[RS + IMM]:4, where -2048 <= IMM < 2048. Here, IMM
+     * is symbolic constant expression (see emitADDI). COMMENT is an optional one-line comment (null
+     * if missing).
+     */
+    public void emitLW(Register rd, Label label, String comment) {
+        rd.isValueTrivial = false;
+        emitInsn(String.format("lw %s, %s", rd, label), comment);
     }
 
     /**
@@ -445,14 +496,6 @@ public class RiscVBackend {
     }
 
     /**
-     * Emits a load-word instruction for globals: RD = MEMORY[LABEL]:4. COMMENT is an optional
-     * one-line comment (null if missing).
-     */
-    public void emitLW(Register rd, Label label, String comment) {
-        emitInsn(String.format("lw %s, %s", rd, label), comment);
-    }
-
-    /**
      * Emits a store-word instruction for globals: MEMORY[LABEL]:4 = RS, using TMP as a temporary
      * register. COMMENT is an optional one-line comment (null if missing).
      */
@@ -465,6 +508,7 @@ public class RiscVBackend {
      * extends the byte loaded. COMMENT is an optional one-line comment (null if missing).
      */
     public void emitLB(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("lb %s, %d(%s)", rd, imm, rs), comment);
     }
 
@@ -473,7 +517,13 @@ public class RiscVBackend {
      * Zero-extends the byte loaded. COMMENT is an optional one-line comment (null if missing).
      */
     public void emitLBU(Register rd, Register rs, Integer imm, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("lbu %s, %d(%s)", rd, imm, rs), comment);
+    }
+
+    public void emitLBU(Register rd, Register rs, String offset, String comment) {
+        rd.isValueTrivial = false;
+        emitInsn(String.format("lbu %s, %s(%s)", rd, offset, rs), comment);
     }
 
     /**
@@ -586,6 +636,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSLT(Register rd, Register rs1, Register rs2, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("slt %s, %s, %s", rd, rs1, rs2), comment);
     }
 
@@ -594,6 +645,7 @@ public class RiscVBackend {
      * comment (null if missing).
      */
     public void emitSEQZ(Register rd, Register rs, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("seqz %s, %s", rd, rs), comment);
     }
 
@@ -602,6 +654,7 @@ public class RiscVBackend {
      * one-line comment (null if missing).
      */
     public void emitSNEZ(Register rd, Register rs, String comment) {
+        rd.isValueTrivial = false;
         emitInsn(String.format("snez %s, %s", rd, rs), comment);
     }
 }
