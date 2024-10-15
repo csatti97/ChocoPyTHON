@@ -1,5 +1,6 @@
 package chocopy.common.analysis.types;
 
+import chocopy.common.astnodes.TypedVar;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.util.ArrayList;
@@ -41,5 +42,21 @@ public class FuncType extends Type {
     @Override
     public String toString() {
         return "<function>";
+    }
+
+    public boolean canOverride(Type targetType) {
+        if (targetType instanceof FuncType) {
+            FuncType targetFuncType = (FuncType) targetType;
+            if (parameters.size() == (targetFuncType).parameters.size()) { // check same parameter number
+                // check param type from the 2nd param (first parameter type is its own class type)
+                for (int i = 1; i < parameters.size(); i++) {
+                    if (!parameters.get(i).equals(targetFuncType.parameters.get(i))) {
+                        return false;
+                    }
+                }
+                return returnType.equals(targetFuncType.returnType);
+            }
+        }
+        return false;
     }
 }
