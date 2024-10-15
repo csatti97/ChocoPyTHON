@@ -2,6 +2,7 @@ package chocopy.common.astnodes;
 
 import chocopy.common.analysis.NodeAnalyzer;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
